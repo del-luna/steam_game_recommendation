@@ -7,8 +7,11 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 '''
-It takes about 30 minutes to collect 500 reviews for each 1000 games.
-how about 300 reviews for each 10000 games?
+Workspace : Colab
+It takes about 2 Hours 22 minutes to collect 300 reviews for each 10000 games.
+get_n_appids(n=10000) takes about 15 minutes
+more details in steam api 'reference' section in the readme.md 
+
 '''
 
 def get_n_reviews(appid, n=300):
@@ -21,7 +24,7 @@ def get_n_reviews(appid, n=300):
     params = {
             'json' : 1,
             'filter' : 'all',
-            'language' : 'korean', 
+            'language' : 'korean', #if you want english replace the parameter with 'english'.
             'day_range' : 9223372036854775807,
             'review_type' : 'all',
             'purchase_type' : 'all'
@@ -80,46 +83,46 @@ if __name__ == '__main__':
     #10K games list 24min
     app_ids = get_n_appids(n=10000)
     reviews = []
-user_ids = []
-game_ids = []
-num_games = []
-num_reviews = []
-play_times = []
-ratings = []
-vote_conf = []
-weights = []
-game_reviews = []
+    user_ids = []
+    game_ids = []
+    num_games = []
+    num_reviews = []
+    play_times = []
+    ratings = []
+    vote_conf = []
+    weights = []
+    game_reviews = []
 
 
-for game_id in tqdm(app_ids[:3000]):
-    get_n_reviews(game_id) #make reviews
-    
-    #print(f'Complete {i}th game review collection')
-    
-    if len(reviews) == 0:
-        continue
-    
-    #start = time.time()
-    for idx in range(len(reviews)):
-        user_ids.append(reviews[idx]['author']['steamid'])
-        game_ids.append(game_id)
-        try:
-            play_times.append(reviews[idx]['author']['playtime_at_review'])
-        except KeyError:
-            '''
-            many game reivews have no 'playtime_at_review' property
-            in this caes replace playtime_at_review -> playtime_forever
-            '''
-            play_times.append(reviews[idx]['author']['playtime_forever'])
-        num_games.append(reviews[idx]['author']['num_games_owned'])
-        num_reviews.append(reviews[idx]['author']['num_reviews'])
-        ratings.append(1 if reviews[idx]['voted_up'] else 0)
-        vote_conf.append(int(reviews[idx]['votes_up']) + int(reviews[idx]['votes_funny']))
-        weights.append(reviews[idx]['weighted_vote_score'])
-        game_reviews.append(reviews[idx]['review'])
-    
-    reviews = [] #global variable initialization
-    #print(f'inner loop spending time : {time.time()-start}')
+    for game_id in tqdm(app_ids[:3000]):
+        get_n_reviews(game_id) #make reviews
+        
+        #print(f'Complete {i}th game review collection')
+        
+        if len(reviews) == 0:
+            continue
+        
+        #start = time.time()
+        for idx in range(len(reviews)):
+            user_ids.append(reviews[idx]['author']['steamid'])
+            game_ids.append(game_id)
+            try:
+                play_times.append(reviews[idx]['author']['playtime_at_review'])
+            except KeyError:
+                '''
+                many game reivews have no 'playtime_at_review' property
+                in this caes replace playtime_at_review -> playtime_forever
+                '''
+                play_times.append(reviews[idx]['author']['playtime_forever'])
+            num_games.append(reviews[idx]['author']['num_games_owned'])
+            num_reviews.append(reviews[idx]['author']['num_reviews'])
+            ratings.append(1 if reviews[idx]['voted_up'] else 0)
+            vote_conf.append(int(reviews[idx]['votes_up']) + int(reviews[idx]['votes_funny']))
+            weights.append(reviews[idx]['weighted_vote_score'])
+            game_reviews.append(reviews[idx]['review'])
+        
+        reviews = [] #global variable initialization
+        #print(f'inner loop spending time : {time.time()-start}')
     
     steam_ratings = pd.DataFrame({'user_ids':user_ids,
                               'game_ids':game_ids,
