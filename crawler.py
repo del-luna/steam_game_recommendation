@@ -80,8 +80,10 @@ def get_n_appids(n=1000, mode='all'):
     return appids[:n]
 
 if __name__ == '__main__':
-    #10K games list 24min
+    
+    #It takes about 24 minutes to load a list of 10K games.
     app_ids = get_n_appids(n=10000)
+
     reviews = []
     user_ids = []
     game_ids = []
